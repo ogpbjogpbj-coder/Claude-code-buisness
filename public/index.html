@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <title>Web Proxy</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0a0a1a;
+      --surface: #12122a;
+      --card: #1a1a3e;
+      --accent: #e94560;
+      --accent2: #6c63ff;
+      --text: #eee;
+      --text-dim: #888;
+      --radius: 14px;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .container {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .logo {
+      font-size: 48px;
+      margin-bottom: 8px;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+
+    h1 {
+      font-size: 32px;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 6px;
+    }
+
+    .tagline {
+      color: var(--text-dim);
+      font-size: 15px;
+      margin-bottom: 32px;
+    }
+
+    .search-box {
+      width: 100%;
+      max-width: 600px;
+      position: relative;
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 16px 60px 16px 20px;
+      font-size: 17px;
+      border: 2px solid transparent;
+      border-radius: var(--radius);
+      background: var(--card);
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      -webkit-appearance: none;
+    }
+
+    .search-box input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 20px rgba(233, 69, 96, 0.2);
+    }
+
+    .search-box input::placeholder {
+      color: #555;
+    }
+
+    .search-box button {
+      position: absolute;
+      right: 6px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 44px;
+      height: 44px;
+      border: none;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff;
+      font-size: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.15s, opacity 0.15s;
+    }
+
+    .search-box button:active {
+      transform: translateY(-50%) scale(0.92);
+    }
+
+    .shortcuts {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 24px;
+      justify-content: center;
+      max-width: 600px;
+    }
+
+    .shortcut {
+      padding: 10px 18px;
+      background: var(--card);
+      border: 1px solid #2a2a4e;
+      border-radius: 10px;
+      color: var(--text-dim);
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+
+    .shortcut:hover, .shortcut:active {
+      background: var(--surface);
+      border-color: var(--accent);
+      color: var(--text);
+    }
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 14px;
+      margin-top: 40px;
+      max-width: 600px;
+      width: 100%;
+    }
+
+    .feature {
+      padding: 18px;
+      background: var(--surface);
+      border-radius: var(--radius);
+      text-align: center;
+      border: 1px solid #1e1e40;
+    }
+
+    .feature .icon { font-size: 28px; margin-bottom: 8px; }
+    .feature h3 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+    .feature p { font-size: 12px; color: var(--text-dim); }
+
+    .loading {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      margin-top: 16px;
+      color: var(--text-dim);
+      font-size: 14px;
+    }
+
+    .loading.active { display: flex; }
+
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2px solid #333;
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .error {
+      display: none;
+      margin-top: 16px;
+      padding: 12px 18px;
+      background: rgba(233, 69, 96, 0.15);
+      border: 1px solid var(--accent);
+      border-radius: 10px;
+      color: var(--accent);
+      font-size: 14px;
+      max-width: 600px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .error.active { display: block; }
+
+    footer {
+      margin-top: 40px;
+      color: #444;
+      font-size: 12px;
+    }
+
+    /* iPad-specific optimizations */
+    @media (min-width: 768px) {
+      h1 { font-size: 42px; }
+      .search-box input { font-size: 18px; padding: 18px 64px 18px 24px; }
+      .features { grid-template-columns: repeat(3, 1fr); }
+    }
+
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #f5f5fa;
+        --surface: #fff;
+        --card: #eeeef5;
+        --text: #111;
+        --text-dim: #666;
+      }
+      .search-box input { box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+      .feature { border-color: #ddd; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">&#9889;</div>
+    <h1>Web Proxy</h1>
+    <p class="tagline">Fast, private browsing from your iPad</p>
+
+    <div class="search-box">
+      <input
+        type="text"
+        id="urlInput"
+        placeholder="Enter a URL (e.g., example.com)"
+        autocapitalize="none"
+        autocomplete="off"
+        autocorrect="off"
+        spellcheck="false"
+        enterkeyhint="go"
+      />
+      <button onclick="navigate()" aria-label="Go">&#x279C;</button>
+    </div>
+
+    <div class="loading" id="loading">
+      <div class="spinner"></div>
+      <span>Loading page...</span>
+    </div>
+
+    <div class="error" id="error"></div>
+
+    <div class="shortcuts">
+      <a class="shortcut" onclick="go('https://www.google.com')">Google</a>
+      <a class="shortcut" onclick="go('https://www.wikipedia.org')">Wikipedia</a>
+      <a class="shortcut" onclick="go('https://www.reddit.com')">Reddit</a>
+      <a class="shortcut" onclick="go('https://news.ycombinator.com')">Hacker News</a>
+      <a class="shortcut" onclick="go('https://www.duckduckgo.com')">DuckDuckGo</a>
+    </div>
+
+    <div class="features">
+      <div class="feature">
+        <div class="icon">&#9889;</div>
+        <h3>Fast</h3>
+        <p>In-memory caching for instant loads</p>
+      </div>
+      <div class="feature">
+        <div class="icon">&#128274;</div>
+        <h3>Private</h3>
+        <p>No logs, no tracking, no cookies stored</p>
+      </div>
+      <div class="feature">
+        <div class="icon">&#128241;</div>
+        <h3>iPad Ready</h3>
+        <p>Optimized touch UI for tablets</p>
+      </div>
+    </div>
+
+    <footer>Web Proxy &mdash; Browse freely</footer>
+  </div>
+
+  <script>
+    const input = document.getElementById("urlInput");
+    const loading = document.getElementById("loading");
+    const error = document.getElementById("error");
+
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") navigate();
+    });
+
+    function navigate() {
+      const url = input.value.trim();
+      if (!url) return;
+      error.classList.remove("active");
+      loading.classList.add("active");
+      window.location.href = "/proxy?url=" + encodeURIComponent(url);
+    }
+
+    function go(url) {
+      input.value = url;
+      loading.classList.add("active");
+      window.location.href = "/proxy?url=" + encodeURIComponent(url);
+    }
+
+    // Focus input on load (with slight delay for iPad)
+    setTimeout(() => input.focus(), 300);
+  </script>
+</body>
+</html>
